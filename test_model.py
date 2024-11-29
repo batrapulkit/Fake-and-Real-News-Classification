@@ -1,24 +1,48 @@
-import unittest
+import streamlit as st
 from tensorflow.keras.models import load_model
 import numpy as np
 
-class TestSavedModel(unittest.TestCase):
+# Title for the Streamlit app
+st.title("Text Classification Model Testing")
 
-    def test_model_loading(self):
-        # Load the model
-        model = load_model('text_classification.h5')
-        self.assertEqual(model.output_shape, (None, 1), "Model output shape should be (None, 1) for binary classification")
+# Sidebar for user actions
+st.sidebar.header("Actions")
+action = st.sidebar.selectbox(
+    "Choose an action",
+    ("Load Model", "Test Model Prediction")
+)
 
-    def test_model_prediction(self):
-        # Load the model
+# Load Model Section
+if action == "Load Model":
+    try:
+        st.subheader("Load the Model")
         model = load_model('text_classification.h5')
-        
-        # Generate dummy input data within the model's vocabulary range
+        st.success("Model loaded successfully!")
+        st.write("Model Summary:")
+        model.summary(print_fn=lambda x: st.text(x))  # Display model summary in the app
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+
+# Test Model Prediction Section
+elif action == "Test Model Prediction":
+    try:
+        st.subheader("Test Model Prediction")
+
+        # Option to load the model
+        st.write("Loading model...")
+        model = load_model('text_classification.h5')
+        st.success("Model loaded successfully!")
+
+        # Generate dummy input data
+        st.write("Generating dummy input data...")
         dummy_data = np.random.randint(0, 1000, size=(1, 100))
-        
-        # Test prediction
-        prediction = model.predict(dummy_data)
-        self.assertEqual(prediction.shape, (1, 1), "Prediction output should be (1, 1) for binary classification")
+        st.write("Dummy input data shape:", dummy_data.shape)
 
-if __name__ == '__main__':
-    unittest.main()
+        # Make prediction
+        st.write("Making prediction...")
+        prediction = model.predict(dummy_data)
+        st.write("Prediction Output Shape:", prediction.shape)
+        st.write("Prediction Value:", prediction)
+
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
